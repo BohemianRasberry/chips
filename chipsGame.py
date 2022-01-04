@@ -1,7 +1,15 @@
 import win32api as a
 import time
 
+
 def getMove():
+    '''
+    Description:        takes desired move of player (w, a, s, d)
+    Argument:           None
+    Return:
+        move.lower()    returns desired move of player in lowercase
+    '''
+
     while True:
         wKey = a.GetKeyState(0x57)
         aKey = a.GetKeyState(0x41)
@@ -35,6 +43,14 @@ def getMove():
 
 
 def levelLoader(currentLevel):
+    '''
+    Description:        retrieves the .txt file where the maps are stored
+    Argument:
+        currentLevel    used to dictate which .txt file to be used
+    Return:
+        Map             returns contents of the .txt file as a list
+    '''
+
     MapsList = ['map1.txt', 'map2.txt', 'map3.txt']
     currentMap = MapsList[currentLevel - 1]
     Map = []
@@ -49,6 +65,13 @@ def levelLoader(currentLevel):
 
 
 def displayMap(Map):
+    '''
+    Description:        prints the contents of Map in a 40 x 20 format
+    Argument:
+        Map             map used for the game
+    Return:             None
+    '''
+    print()
     for i in range(800):
         if ((i > 0) and (i % 40 == 0)):
             print()
@@ -57,23 +80,57 @@ def displayMap(Map):
 
 
 def locatePlayer(Map):
+    '''
+    Description:        locates player in map
+    Argument:
+        Map             map used for the game
+    Return:
+        loc             returns player index
+    '''
     loc = Map.index('p')
     return loc
 
 
 def isWall(Map, targetLoc):
+    '''
+    Description:        checks if the desired destination is a wall
+    Argument:
+        Map             map used for the game
+        targetLoc       index of player's desired location
+    Return:
+        True            returns boolean indicating desired location is a wall
+        False           returns boolean indicating desired location is not a wall
+    '''
     if Map[targetLoc] == '#':
         return True
     else:
         return False
 
-def isDoor(Map, targetLod):
-    if Map[targetLod] == 'O':
+
+def isGate(Map, targetLoc):
+    '''
+    Description:        checks if the desired destination is a gate
+    Argument:
+        Map             map used for the game
+        targetLoc       index of player's desired location
+    Return:
+        True            returns boolean indicating desired location is a gate
+        False           returns boolean indicating desired location is not a gate
+    '''
+    if Map[targetLoc] == 'O':
         return True
     else:
         return False
 
+
 def switching(switcher):
+    '''
+    Description:        switches the direction of the gate
+    Argument:
+        switcher        indicates if the direction of the gate
+    Return:
+        switcher        returns boolean that indicates new direction of the gate
+    '''
     if switcher == True:
         switcher = False
     else:
@@ -81,7 +138,15 @@ def switching(switcher):
 
     return switcher
 
-def moveDoor(Map, switcher):
+
+def moveGate(Map, switcher):
+    '''
+    Description:        moves gate to the left or right
+    Argument:
+        Map             map used for the game
+        switcher        used to check if the gate is to move left or right
+    Return:             None
+    '''
     counter = Map.count('O')
     if switcher == True:
         for i in range(counter):
@@ -98,20 +163,48 @@ def moveDoor(Map, switcher):
             Map[indx + 2] = 'O'
             Map.reverse()
 
-def addKey(keysHolder, Map, targetLoc):
-    if Map[targetLoc] in ['g', 'y']:  # checks if there is a key on the tile where the player will move into
-        keysHolder.append(Map[targetLoc])  # adds the key to the player's inventory
 
-    return keysHolder  # returns a list containing the keys
+def addKey(keysHolder, Map, targetLoc):
+    '''
+    Description:        adds available key to list
+    Argument:
+        keysHolder      list that will contain keys
+        Map             map used for the game
+        targetLoc       index of player's desired location
+    Return:
+        keysHolder      returns list containing new keys
+    '''
+    if Map[targetLoc] in ['g', 'y']:  # checks if there is a key on the tile where the player will move into
+        keysHolder.append({"location": targetLoc, "value": Map[targetLoc]})  # adds the key to the player's inventory
+
+    return keysHolder
 
 
 def addChip(chips, Map, targetLoc):
+    '''
+    Description:        adds available chips to list
+    Argument:
+        chips           list that will contain chips
+        Map             map used for the game
+        targetLoc       index of player's desired location
+    Return:
+        chips           returns list containing new chips
+    '''
     if Map[targetLoc] == 'c':
         chips.append('c')
     return chips
 
 
 def addImmunity(immunity, Map, targetLoc):
+    '''
+    Description:        adds available immunities to list
+    Argument:
+        immunity        list that will contain immunities
+        Map             map used for the game
+        targetLoc       index of player's desired location
+    Return:
+        immunity        returns list containing new immunities
+    '''
     if Map[targetLoc] in ['z']:
         immunity.append(Map[targetLoc])
     if Map[targetLoc] in ['f']:
@@ -121,7 +214,15 @@ def addImmunity(immunity, Map, targetLoc):
 
 
 def checkDoor(Map, targetLoc):  # checks if the destination is a door
-
+    '''
+    Description:        checks if the desired destination is a door
+    Argument:
+        Map             map used for the game
+        targetLoc       index of player's desired location
+    Return:
+        True            returns boolean indicating desired location is a door
+        False           returns boolean indicating desired location is not a door
+    '''
     if Map[targetLoc] in ['G', 'Y']:
         return True
 
@@ -130,14 +231,33 @@ def checkDoor(Map, targetLoc):  # checks if the destination is a door
 
 
 def keyAvailable(door, keysHolder):
+    '''
+    Description:        checks if the appropriate key is available in the list
+    Argument:
+        door            desired location of player is a door
+        keysHolder      list of available keys
+    Return:
+        True            returns boolean indicating appropriate key is available
+        False           returns boolean indicating appropriate key is not available
+    '''
     key = door.lower()
-    if key in keysHolder:
-        return True
-    else:
-        return False
+    for item in keysHolder:
+        if item["value"] == key:
+            return True
+
+    return False
 
 
 def isImmune(immunity, hazard):
+    '''
+    Description:        checks if appropriate immunity is available for an element tile
+    Argument:
+        immunity        list of available immunities
+        hazard          desired location of player is an element tile
+    Return:
+        True            returns boolean indicating appropriate immunity is available
+        False           returns boolean indicating appropriate immunity is not available
+    '''
     if hazard == 'W' and 'z' in immunity:
         return True
 
@@ -148,7 +268,15 @@ def isImmune(immunity, hazard):
         return False
 
 
-def locateTarget(move, Map):  # locates the desired position
+def locateTarget(move, Map):
+    '''
+    Description:        locates player's desired move in map
+    Argument:
+        move            player's desired move
+        Map             map used for the game
+    Return:
+        targetLoc       returns index of desired position
+    '''
     playerLoc = locatePlayer(Map)  # locates the player on the map
     if move == 'w':
         targetLoc = playerLoc - 40
@@ -159,59 +287,58 @@ def locateTarget(move, Map):  # locates the desired position
     elif move == 'd':
         targetLoc = playerLoc + 1
 
-    return targetLoc  # returns the the index of the desired position
-
-
-def slide(move, Map, targetLoc):
-    if move == 'd':
-        if Map[targetLoc] == '<':
-            targetLoc -= 1
-        while Map[targetLoc] == '>':
-            targetLoc += 1
-
-    elif move == 'a':
-        if Map[targetLoc] == '>':
-            targetLoc += 1
-
-        while Map[targetLoc] == '<':
-            targetLoc -= 1
-
-    elif move == 'w':
-        targetLoc += 40
-
-    elif move == 's':
-        targetLoc -= 40
-
     return targetLoc
 
-
 def movePlayer(Map, targetLoc, prevTile):
+    '''
+    Description:        moves player to the desired destination
+    Argument:
+        Map             map used for the game
+        targetLoc       index of player's desired location
+        prevTile        character that will replace player's current position
+    Return:
+        Map             returns map with player moved to desired destination
+    '''
     playerLoc = locatePlayer(Map)
 
-    if isWall(Map, targetLoc) == True:
-        pass
-
-    elif isDoor(Map, targetLoc) == True:
-        pass
-
-    else:
-        Map[playerLoc] = prevTile
-        Map[targetLoc] = 'p'
+    Map[playerLoc] = prevTile
+    Map[targetLoc] = 'p'
 
     return Map
 
 
 def resetPos(Map, initialPos):
-    playerLoc = locatePlayer(Map)
+    '''
+    Description:        resets player position
+    Argument:
+        Map             map used for the game
+        initialPos      index of player at the beginning of the game
+    Return:
+        targetLoc       returns map wherein player is at its starting position
+    '''
+    # playerLoc = locatePlayer(Map)
     Map[initialPos] = 'p'
     return Map
 
 
 def gameReset():
+    '''
+    Description:        resets whole map
+    Argument:           None
+    Return:
+        True            returns boolean that activates while loop again
+    '''
     return True
 
 
 def findKeys(Map):
+    '''
+    Description:        locates keys within map
+    Argument:
+        Map             map used for the game
+    Return:
+        keysLocs        returns index of each key
+    '''
     keysLoc = []
 
     for item in ['y', 'g']:
@@ -219,18 +346,24 @@ def findKeys(Map):
             keyLoc = Map.index(item)
             key = Map[keyLoc]
 
-            keysLoc.append({keyLoc: key})
+            keysLoc.append({"location": keyLoc, "value": key})
 
             Map[keyLoc] = ' '
 
     for item in keysLoc:
-        for i in item:
-            Map[i] = item[i]
+        Map[item["location"]] = item["value"]
 
     return keysLoc
 
 
 def findImmunities(Map):
+    '''
+    Description:        locates immunities within map
+    Argument:
+        Map             map used for the game
+    Return:
+        immunityLocs    returns the index of each immunity
+    '''
     immunityLocs = []
 
     for item in ['z', 'f']:
@@ -238,18 +371,24 @@ def findImmunities(Map):
             immunityLoc = Map.index(item)
             immunity = Map[immunityLoc]
 
-            immunityLocs.append({immunityLoc: immunity})
+            immunityLocs.append({"location": immunityLoc, "value": immunity})
 
             Map[immunityLoc] = ' '
 
     for item in immunityLocs:
-        for i in item:
-            Map[i] = item[i]
+        Map[item["location"]] = item["value"]
 
     return immunityLocs
 
 
 def findChips(Map):
+    '''
+    Description:        locates chips within map
+    Argument:
+        Map             map used for the game
+    Return:
+        chipsLoc        returns list of chips' indeces
+    '''
     chipsLoc = []
 
     while 'c' in Map:
@@ -266,12 +405,25 @@ def findChips(Map):
 
 
 def resetItems(Map, keysLoc, immunityLocs, chipsLoc, keysHolder, immunity, chips):
-    itemDicts = [keysLoc, immunityLocs]
+    '''
+    Description:        removes all items in player's inventory
+    Argument:
+        Map             map used for the game
+        keysLoc         indeces of keys' initial location
+        immunityLocs    indeces of immunities' initial location
+        chipsLoc        indeces of chips' initial location
+        keysHolder      list of available keys
+        immunity        list of available immunities
+        chips           list of available chips
+    Return:             None
+    '''
+    # itemDicts = [keysLoc, immunityLocs]
 
-    for itemHolder in itemDicts:
-        for item in itemHolder:
-            for i in item:
-                Map[i] = item[i]
+    for item in immunityLocs:
+        Map[item["location"]] = item["value"]
+
+    for item in keysHolder:
+        Map[item["location"]] = item["value"]
 
     for i in range(len(chipsLoc)):
         Map[chipsLoc[i]] = 'c'
@@ -282,19 +434,39 @@ def resetItems(Map, keysLoc, immunityLocs, chipsLoc, keysHolder, immunity, chips
 
     # return Map
 
+
 def timer(initialtime):
+    '''
+    Description:        serves as the timer for the game
+    Argument:
+        initialtime     starting time of the game
+    Return:
+        targetLoc       returns gameplay time in seconds
+    '''
     endtime = time.time()
     laptime = round((endtime - initialtime), 2)
 
     return laptime
 
+
+def Menu():
+    print("welcome to Chips Game!")
+
+
 def main():
-    # desigMap = 1
+    '''
+    Description:        contains while loops which keeps the game running until the last map
+    Argument:           None
+    Return:             None
+    '''
     currentLevel = 1
     playAgain = True
     starttime = time.time()
+    print('Welcome to Chips Game!')
 
     while playAgain:
+        if currentLevel == 4:
+            break
         Map = levelLoader(currentLevel)
 
         displayMap(Map)
@@ -304,7 +476,7 @@ def main():
         chips = []
         immunity = []
 
-        # keysLoc = findKeys(Map)
+        keysLoc = findKeys(Map)
         chipsLoc = findChips(Map)
         immunityLocs = findImmunities(Map)
 
@@ -315,15 +487,14 @@ def main():
         switcher = True
 
         while gameOn:
-            keysLoc = findKeys(Map)
+            # keysLoc = findKeys(Map)
             currentLoc = locatePlayer(Map)
 
             move = getMove()  # gets the player's desired movement
             targetLoc = locateTarget(move, Map)
 
-            # checkDoor(Map, targetLoc)
             addKey(keysHolder, Map, targetLoc)
-            addChip(chips, Map, targetLoc)
+            # addChip(chips, Map, targetLoc)
             addImmunity(immunity, Map, targetLoc)
 
             if checkDoor(Map, targetLoc) == True:  # checks if the destination is a door
@@ -335,10 +506,18 @@ def main():
                     movePlayer(Map, targetLoc, prevTile)
                     prevTile = ' '
 
-                    keysHolder.remove(key)
+                    for item in keysHolder:
+                        if item["value"] == key:
+                            keysHolder.remove(item)
+                            break
 
                 else:
                     print('u need a key!')
+
+            elif Map[targetLoc] == 'c':
+                chips.append('c')
+                movePlayer(Map, targetLoc, prevTile)
+                prevTile = ' '
 
             elif Map[targetLoc] == 'E':
                 if len(chips) == 7:
@@ -350,9 +529,12 @@ def main():
                     print('\nYour total time is ' + str(gameTimeT))
 
                     gameTimeI = timer(levelTime)
-                    print('Your time this level is ' + str(gameTimeI))
+                    print('Your time for this level is ' + str(gameTimeI))
 
                     currentLevel += 1
+
+                    score = 600 - gameTimeT
+                    print("Your score is " + str(score))
                     break
 
                 else:
@@ -371,9 +553,15 @@ def main():
                     print('you died')
                     break
 
+            elif isWall(Map, targetLoc):
+                pass
+
+            elif isGate(Map, targetLoc):
+                pass
+
             elif Map[targetLoc] == 'o':
                 temp = Map[targetLoc]
-                moveDoor(Map, switcher)
+                moveGate(Map, switcher)
                 movePlayer(Map, targetLoc, prevTile)
                 switcher = switching(switcher)
                 prevTile = temp
@@ -387,11 +575,30 @@ def main():
                 prevTile = ' '
 
             elif Map[targetLoc] in ['>', '<']:
+                if move == 'd':
+                    if Map[targetLoc] == '<':
+                        targetLoc -= 1
+                        movePlayer(Map, targetLoc, prevTile)
+                    else:
+                        while Map[targetLoc] == '>':
+                            targetLoc += 1
+                        newPrev = Map[targetLoc]
+                        movePlayer(Map, targetLoc, prevTile)
+                        prevTile = newPrev
+                elif move == 'a':
+                    if Map[targetLoc] == '>':
+                        targetLoc += 1
+                    else:
+                        while Map[targetLoc] == '<':
+                            targetLoc -= 1
+                        newPrev = Map[targetLoc]
+                        movePlayer(Map, targetLoc, prevTile)
+                        prevTile = newPrev
 
-                slideLoc = slide(move, Map, targetLoc)
-                newPrev = Map[slideLoc]
-                movePlayer(Map, slideLoc, prevTile)
-                prevTile = newPrev
+                elif move == 'w':
+                    pass
+                elif move == 's':
+                    pass
 
             else:  # no door
 
