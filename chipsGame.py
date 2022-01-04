@@ -449,10 +449,6 @@ def timer(initialtime):
     return laptime
 
 
-def Menu():
-    print("welcome to Chips Game!")
-
-
 def main():
     '''
     Description:        contains while loops which keeps the game running until the last map
